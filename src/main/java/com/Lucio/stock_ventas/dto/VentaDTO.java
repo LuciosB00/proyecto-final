@@ -1,6 +1,8 @@
 package com.Lucio.stock_ventas.dto;
 
 import com.Lucio.stock_ventas.entity.EstadoVenta;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 
 import java.util.List;
 
@@ -9,6 +11,7 @@ public class VentaDTO {
     private EstadoVenta estado;
     private Double montoPagado;
     private List<DetalleVentaDTO> detalles;
+    private boolean activo;
 
     public VentaDTO() {
     }
@@ -42,5 +45,13 @@ public class VentaDTO {
 
     public void setDetalles(List<DetalleVentaDTO> detalles) {
         this.detalles = detalles;
+    }
+
+    public boolean  getActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
     }
 }

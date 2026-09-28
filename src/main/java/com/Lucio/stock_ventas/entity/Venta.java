@@ -31,6 +31,8 @@ public class Venta {
 
     private Double montoPagado;
 
+    private boolean activo;
+
     @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL)
     private List<DetalleVenta> detalles = new ArrayList<>();
 
@@ -42,12 +44,12 @@ public class Venta {
         this.estado = estado;
         this.total = total;
         this.montoPagado = montoPagado;
+        this.activo = true;
     }
 
     public Long getId() {
         return id;
     }
-
     public void setId(Long id) {
         this.id = id;
     }
@@ -55,7 +57,6 @@ public class Venta {
     public LocalDateTime getFecha() {
         return fecha;
     }
-
     public void setFecha(LocalDateTime fecha) {
         this.fecha = fecha;
     }
@@ -63,7 +64,6 @@ public class Venta {
     public EstadoVenta getEstado() {
         return estado;
     }
-
     public void setEstado(EstadoVenta estado) {
         this.estado = estado;
     }
@@ -71,7 +71,6 @@ public class Venta {
     public Double getTotal() {
         return total;
     }
-
     public void setTotal(Double total) {
         this.total = total;
     }
@@ -79,7 +78,6 @@ public class Venta {
     public Double getMontoPagado() {
         return montoPagado;
     }
-
     public void setMontoPagado(Double montoPagado) {
         this.montoPagado = montoPagado;
     }
@@ -87,8 +85,14 @@ public class Venta {
     public List<DetalleVenta> getDetalles() {
         return detalles;
     }
-
     public void setDetalles(List<DetalleVenta> detalles) {
         this.detalles = detalles;
+    }
+
+    public boolean getActivo() {
+        return activo;
+    }
+    public void setActivo(boolean activo) {
+        this.activo = activo;
     }
 }

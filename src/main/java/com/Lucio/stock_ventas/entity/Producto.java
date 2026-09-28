@@ -20,6 +20,8 @@ public class Producto {
 
     private Integer stock;
 
+    private boolean activo;
+
     public Object getNombre() {
         return this.nombre;
     }
@@ -39,5 +41,12 @@ public class Producto {
     }
     public void setStock(Object stock) {
         this.stock = (Integer) stock;
+    }
+
+    public boolean getActivo() {
+        return this.activo;
+    }
+    public void setActivo(boolean activo) {
+        this.activo = activo;
     }
 }
