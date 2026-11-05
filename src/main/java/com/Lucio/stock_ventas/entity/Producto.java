@@ -1,4 +1,3 @@
-
 package com.Lucio.stock_ventas.entity;
 
 import jakarta.persistence.Entity;
@@ -21,47 +20,32 @@ public class Producto {
 
     private Integer stock;
 
-    private boolean activo = true;
+    private boolean activo;
 
-    public Producto() {
+    public Object getNombre() {
+        return this.nombre;
+    }
+    public void setNombre(Object nombre) {
+        this.nombre = nombre.toString();
     }
 
-    public Long getId() {
-        return id;
+    public Object getPrecio() {
+        return this.precio;
+    }
+    public void setPrecio(Object precio) {
+        this.precio = (Double) precio;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public Object getStock() {
+        return this.stock;
+    }
+    public void setStock(Object stock) {
+        this.stock = (Integer) stock;
     }
 
-    public String getNombre() {
-        return nombre;
+    public boolean getActivo() {
+        return this.activo;
     }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public Double getPrecio() {
-        return precio;
-    }
-
-    public void setPrecio(Double precio) {
-        this.precio = precio;
-    }
-
-    public Integer getStock() {
-        return stock;
-    }
-
-    public void setStock(Integer stock) {
-        this.stock = stock;
-    }
-
-    public boolean isActivo() {
-        return activo;
-    }
-
     public void setActivo(boolean activo) {
         this.activo = activo;
     }
