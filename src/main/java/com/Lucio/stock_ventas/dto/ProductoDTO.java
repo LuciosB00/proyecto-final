@@ -1,47 +1,30 @@
 package com.Lucio.stock_ventas.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
+
+import java.math.BigDecimal;
+
 public class ProductoDTO {
-
+    @NotBlank
     private String nombre;
-    private Double precio;
+    @NotNull @Positive
+    private BigDecimal precio;
+    @NotNull @PositiveOrZero
     private Integer stock;
-    private boolean activo;
 
-    public ProductoDTO() {
-    }
-
-    public ProductoDTO(String nombre, Double precio, Integer stock) {
+    public ProductoDTO() { }
+    public ProductoDTO(String nombre, BigDecimal precio, Integer stock) {
         this.nombre = nombre;
         this.precio = precio;
         this.stock = stock;
-        this.activo = true;
     }
-
-    public String getNombre() {
-        return nombre;
-    }
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public Double getPrecio() {
-        return precio;
-    }
-    public void setPrecio(Double precio) {
-        this.precio = precio;
-    }
-
-    public Integer getStock() {
-        return stock;
-    }
-    public void setStock(Integer stock) {
-        this.stock = stock;
-    }
-
-    public boolean getActivo() {
-        return activo;
-    }
-    public void setActivo(boolean activo) {
-        this.activo = activo;
-    }
+    public String getNombre() { return nombre; }
+    public void setNombre(String nombre) { this.nombre = nombre; }
+    public BigDecimal getPrecio() { return precio; }
+    public void setPrecio(BigDecimal precio) { this.precio = precio; }
+    public Integer getStock() { return stock; }
+    public void setStock(Integer stock) { this.stock = stock; }
 }
