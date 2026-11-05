@@ -1,7 +1,9 @@
 package com.Lucio.stock_ventas.service;
 
+import com.Lucio.stock_ventas.dto.ProductoDTO;
 import com.Lucio.stock_ventas.entity.Producto;
 import com.Lucio.stock_ventas.repository.ProductoRepository;
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -42,5 +44,22 @@ public class ProductoService {
     public void eliminar(Long id) {
         Producto producto = obtenerPorId(id);
         productoRepository.delete(producto);
+    }
+
+    public List<Producto> obtenerConStockBajo() {
+        return productoRepository.findByStockLessThan(10);
+    }
+
+    public Producto guardar(@Valid ProductoDTO producto) {
+        return productoRepository.save(producto.toEntity());
+    }
+
+    public Producto actualizar(Long id, @Valid ProductoDTO producto) {
+        Producto existente = obtenerPorId(id);
+        return existente;
+    }
+
+    public void desactivar(Long id) {
+
     }
 }

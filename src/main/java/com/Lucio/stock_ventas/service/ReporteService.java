@@ -48,7 +48,7 @@ public class ReporteService {
             for (DetalleVenta detalle : venta.getDetalles()) {
                 Producto p = detalle.getProducto();
                 productos.compute(p.getId(), (id, actual) -> actual == null
-                        ? new ProductoVendido(p.getNombre(), detalle.getCantidad())
+                        ? new ProductoVendido(p.getNombre().toString(), detalle.getCantidad())
                         : new ProductoVendido(actual.nombre(), actual.cantidad() + detalle.getCantidad()));
             }
         }

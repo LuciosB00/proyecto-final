@@ -5,6 +5,12 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
+
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "producto")
@@ -21,6 +27,10 @@ public class Producto {
     private Integer stock;
 
     private boolean activo;
+
+    public Producto(@NotBlank String nombre, @NotNull @Positive BigDecimal precio, @NotNull @PositiveOrZero Integer stock) {
+
+    }
 
     public Object getNombre() {
         return this.nombre;
@@ -48,5 +58,9 @@ public class Producto {
     }
     public void setActivo(boolean activo) {
         this.activo = activo;
+    }
+
+    public Long getId() {
+        return this.id;
     }
 }

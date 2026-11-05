@@ -40,7 +40,7 @@ public class VentaService {
                 .filter(v -> desde == null || !v.getFecha().toLocalDate().isBefore(desde))
                 .filter(v -> hasta == null || !v.getFecha().toLocalDate().isAfter(hasta))
                 .filter(v -> filtroProducto.isEmpty() || v.getDetalles().stream()
-                        .anyMatch(d -> d.getProducto().getNombre().toLowerCase().contains(filtroProducto)))
+                        .anyMatch(d -> d.getProducto().getNombre().toString().contains(filtroProducto)))
                 .toList();
     }
 
@@ -79,14 +79,14 @@ public class VentaService {
             Producto producto = productoRepository.findActivoByIdForUpdate(linea.getKey())
                     .orElseThrow(() -> new java.util.NoSuchElementException("Producto activo no encontrado: " + linea.getKey()));
             int cantidad = linea.getValue();
-            if (producto.getStock() < cantidad) {
+            if ((int)producto.getStock() < cantidad) {
                 throw new IllegalStateException("Stock insuficiente para el producto: " + producto.getNombre());
             }
-            BigDecimal precio = producto.getPrecio();
+            BigDecimal precio = (BigDecimal) producto.getPrecio();
             BigDecimal subtotal = precio.multiply(BigDecimal.valueOf(cantidad));
             venta.agregarDetalle(new DetalleVenta(venta, producto, cantidad, precio, subtotal));
             total = total.add(subtotal);
-            producto.setStock(producto.getStock() - cantidad);
+            producto.setStock((int)producto.getStock() - cantidad);
             productos.add(producto);
         }
         if (montoPagado.compareTo(total) > 0) {

@@ -1,5 +1,6 @@
 package com.Lucio.stock_ventas.dto;
 
+import com.Lucio.stock_ventas.entity.Producto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -27,4 +28,8 @@ public class ProductoDTO {
     public void setPrecio(BigDecimal precio) { this.precio = precio; }
     public Integer getStock() { return stock; }
     public void setStock(Integer stock) { this.stock = stock; }
+
+    public Producto toEntity() {
+        return new Producto(nombre, precio, stock);
+    }
 }
