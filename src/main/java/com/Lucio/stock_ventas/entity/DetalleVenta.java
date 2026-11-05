@@ -1,12 +1,17 @@
 package com.Lucio.stock_ventas.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "detalle_venta")
@@ -16,25 +21,28 @@ public class DetalleVenta {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @JsonBackReference
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "venta_id", nullable = false)
     private Venta venta;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "producto_id", nullable = false)
     private Producto producto;
 
+    @Column(nullable = false)
     private Integer cantidad;
 
-    private Double precioUnitario;
+    @Column(nullable = false, precision = 12, scale = 2)
+    private BigDecimal precioUnitario;
 
-    private Double subtotal;
+    @Column(nullable = false, precision = 12, scale = 2)
+    private BigDecimal subtotal;
 
     public DetalleVenta() {
     }
 
-    public DetalleVenta(Venta venta, Producto producto, Integer cantidad,
-                        Double precioUnitario, Double subtotal) {
+    public DetalleVenta(Venta venta, Producto producto, Integer cantidad, BigDecimal precioUnitario, BigDecimal subtotal) {
         this.venta = venta;
         this.producto = producto;
         this.cantidad = cantidad;
@@ -42,51 +50,16 @@ public class DetalleVenta {
         this.subtotal = subtotal;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Venta getVenta() {
-        return venta;
-    }
-
-    public void setVenta(Venta venta) {
-        this.venta = venta;
-    }
-
-    public Producto getProducto() {
-        return producto;
-    }
-
-    public void setProducto(Producto producto) {
-        this.producto = producto;
-    }
-
-    public Integer getCantidad() {
-        return cantidad;
-    }
-
-    public void setCantidad(Integer cantidad) {
-        this.cantidad = cantidad;
-    }
-
-    public Double getPrecioUnitario() {
-        return precioUnitario;
-    }
-
-    public void setPrecioUnitario(Double precioUnitario) {
-        this.precioUnitario = precioUnitario;
-    }
-
-    public Double getSubtotal() {
-        return subtotal;
-    }
-
-    public void setSubtotal(Double subtotal) {
-        this.subtotal = subtotal;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public Venta getVenta() { return venta; }
+    public void setVenta(Venta venta) { this.venta = venta; }
+    public Producto getProducto() { return producto; }
+    public void setProducto(Producto producto) { this.producto = producto; }
+    public Integer getCantidad() { return cantidad; }
+    public void setCantidad(Integer cantidad) { this.cantidad = cantidad; }
+    public BigDecimal getPrecioUnitario() { return precioUnitario; }
+    public void setPrecioUnitario(BigDecimal precioUnitario) { this.precioUnitario = precioUnitario; }
+    public BigDecimal getSubtotal() { return subtotal; }
+    public void setSubtotal(BigDecimal subtotal) { this.subtotal = subtotal; }
 }
