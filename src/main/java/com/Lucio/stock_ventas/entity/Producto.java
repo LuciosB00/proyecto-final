@@ -1,15 +1,7 @@
+
 package com.Lucio.stock_ventas.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.PositiveOrZero;
-
+import jakarta.persistence.*;
 import java.math.BigDecimal;
 
 @Entity
@@ -20,47 +12,65 @@ public class Producto {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String nombre;
 
-    private Double precio;
+    @Column(nullable = false, precision = 12, scale = 2)
+    private BigDecimal precio;
 
+    @Column(nullable = false)
     private Integer stock;
 
-    private boolean activo;
+    @Column(nullable = false)
+    private boolean activo = true;
 
-    public Producto(@NotBlank String nombre, @NotNull @Positive BigDecimal precio, @NotNull @PositiveOrZero Integer stock) {
-
-    }
-
-    public Object getNombre() {
-        return this.nombre;
-    }
-    public void setNombre(Object nombre) {
-        this.nombre = nombre.toString();
+    public Producto() {
     }
 
-    public Object getPrecio() {
-        return this.precio;
-    }
-    public void setPrecio(Object precio) {
-        this.precio = (Double) precio;
-    }
-
-    public Object getStock() {
-        return this.stock;
-    }
-    public void setStock(Object stock) {
-        this.stock = (Integer) stock;
-    }
-
-    public boolean getActivo() {
-        return this.activo;
-    }
-    public void setActivo(boolean activo) {
-        this.activo = activo;
+    public Producto(String nombre, BigDecimal precio, Integer stock) {
+        this.nombre = nombre;
+        this.precio = precio;
+        this.stock = stock;
+        this.activo = true;
     }
 
     public Long getId() {
-        return this.id;
+        return id;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public BigDecimal getPrecio() {
+        return precio;
+    }
+
+    public void setPrecio(BigDecimal precio) {
+        this.precio = precio;
+    }
+
+    public Integer getStock() {
+        return stock;
+    }
+
+    public void setStock(Integer stock) {
+        this.stock = stock;
+    }
+
+    public boolean isActivo() {
+        return activo;
+    }
+
+    public boolean getActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
     }
 }

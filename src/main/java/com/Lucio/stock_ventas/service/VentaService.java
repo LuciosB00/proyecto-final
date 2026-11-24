@@ -55,47 +55,77 @@ public class VentaService {
         if (datos.getDetalles() == null || datos.getDetalles().isEmpty()) {
             throw new IllegalArgumentException("La venta debe incluir al menos un producto");
         }
-        EstadoVenta estado = datos.getEstado() == null ? EstadoVenta.EN_ESPERA : datos.getEstado();
-        BigDecimal montoPagado = datos.getMontoPagado() == null ? BigDecimal.ZERO : datos.getMontoPagado();
-        if (montoPagado.signum() < 0) throw new IllegalArgumentException("El monto pagado no puede ser negativo");
+
+        EstadoVenta estado = datos.getEstado() == null
+                ? EstadoVenta.EN_ESPERA
+                : datos.getEstado();
+
+        // Las ventas nuevas solo pueden crearse en espera.
+        if (estado != EstadoVenta.EN_ESPERA) {
+            throw new IllegalArgumentException(
+                    "Una venta nueva debe crearse en estado EN_ESPERA"
+            );
+        }
+
+        BigDecimal montoPagado = datos.getMontoPagado() == null
+                ? BigDecimal.ZERO
+                : datos.getMontoPagado();
+
+        if (montoPagado.signum() < 0) {
+            throw new IllegalArgumentException("El monto pagado no puede ser negativo");
+        }
 
         Map<Long, Integer> cantidades = new LinkedHashMap<>();
+
         for (DetalleVentaDTO linea : datos.getDetalles()) {
-            if (linea.getProductoId() == null || linea.getProductoId() <= 0 || linea.getCantidad() == null || linea.getCantidad() <= 0) {
-                throw new IllegalArgumentException("Cada línea debe tener producto y cantidad mayores que cero");
+            if (linea.getProductoId() == null || linea.getProductoId() <= 0
+                    || linea.getCantidad() == null || linea.getCantidad() <= 0) {
+                throw new IllegalArgumentException(
+                        "Cada línea debe tener producto y cantidad mayores que cero"
+                );
             }
+
             cantidades.merge(linea.getProductoId(), linea.getCantidad(), Math::addExact);
         }
 
         Venta venta = new Venta();
         venta.setFecha(LocalDateTime.now());
-        venta.setEstado(estado);
+        venta.setEstado(EstadoVenta.EN_ESPERA);
         venta.setActivo(true);
         venta.setMontoPagado(montoPagado);
+
         BigDecimal total = BigDecimal.ZERO;
-        List<Producto> productos = new ArrayList<>();
 
         for (Map.Entry<Long, Integer> linea : cantidades.entrySet()) {
-            Producto producto = productoRepository.findActivoByIdForUpdate(linea.getKey())
-                    .orElseThrow(() -> new java.util.NoSuchElementException("Producto activo no encontrado: " + linea.getKey()));
+            Producto producto = productoRepository.findByIdAndActivoTrue(linea.getKey())
+                    .orElseThrow(() -> new java.util.NoSuchElementException(
+                            "Producto activo no encontrado: " + linea.getKey()
+                    ));
+
             int cantidad = linea.getValue();
-            if ((int)producto.getStock() < cantidad) {
-                throw new IllegalStateException("Stock insuficiente para el producto: " + producto.getNombre());
-            }
-            BigDecimal precio = (BigDecimal) producto.getPrecio();
+
+            BigDecimal precio = producto.getPrecio();
             BigDecimal subtotal = precio.multiply(BigDecimal.valueOf(cantidad));
-            venta.agregarDetalle(new DetalleVenta(venta, producto, cantidad, precio, subtotal));
+
+            venta.agregarDetalle(
+                    new DetalleVenta(venta, producto, cantidad, precio, subtotal)
+            );
+
             total = total.add(subtotal);
-            producto.setStock((int)producto.getStock() - cantidad);
-            productos.add(producto);
         }
+
         if (montoPagado.compareTo(total) > 0) {
-            throw new IllegalArgumentException("El monto pagado no puede superar el total de la venta");
+            throw new IllegalArgumentException(
+                    "El monto pagado no puede superar el total de la venta"
+            );
         }
+
         venta.setTotal(total);
-        productoRepository.saveAll(productos);
+
+        // No se modifica stock en esta etapa
         return ventaRepository.save(venta);
     }
+
 
     @Transactional
     public Venta actualizarEstadoYPago(Long id, EstadoVenta estado, BigDecimal montoPagado) {
