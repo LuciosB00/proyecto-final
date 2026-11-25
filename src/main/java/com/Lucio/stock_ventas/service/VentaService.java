@@ -19,6 +19,8 @@ import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
+import java.util.ArrayList;
 
 @Service
 @Transactional(readOnly = true)
@@ -152,14 +154,95 @@ public class VentaService {
         return ventaRepository.save(venta);
     }
 
+
     @Transactional
     public Venta actualizarEstadoYPago(Long id, EstadoVenta estado, BigDecimal montoPagado) {
-        if (estado == null) throw new IllegalArgumentException("El estado es obligatorio");
-        if (montoPagado == null || montoPagado.signum() < 0) throw new IllegalArgumentException("El monto pagado no puede ser negativo");
-        Venta venta = obtenerPorId(id);
-        if (montoPagado.compareTo(venta.getTotal()) > 0) throw new IllegalArgumentException("El monto pagado no puede superar el total de la venta");
-        venta.setEstado(estado);
+        if (estado == null) {
+            throw new IllegalArgumentException("El estado es obligatorio");
+        }
+        if (montoPagado == null || montoPagado.signum() < 0) {
+            throw new IllegalArgumentException("El monto pagado no puede ser negativo");
+        }
+        Venta venta = ventaRepository.findByIdForUpdate(id)
+                .orElseThrow(() -> new NoSuchElementException(
+                        "Venta no encontrada: " + id
+                ));
+        // Cargar los detalles y productos de la venta bloqueada
+        ventaRepository.findConDetallesById(id);
+        if (venta.getEstado() == EstadoVenta.CANCELADO) {
+            throw new IllegalStateException("No se puede modificar una venta cancelada");
+        }
+        if (venta.getEstado() != EstadoVenta.EN_ESPERA
+                && venta.getEstado() != EstadoVenta.DEBE
+                && venta.getEstado() != EstadoVenta.PAGADO) {
+            throw new IllegalStateException("La venta no admite modificaciones de pago");
+        }
+        if (estado != EstadoVenta.DEBE && estado != EstadoVenta.PAGADO) {
+            throw new IllegalArgumentException(
+                    "El estado solicitado debe ser DEBE o PAGADO"
+            );
+        }
+        if (montoPagado.compareTo(venta.getTotal()) > 0) {
+            throw new IllegalArgumentException(
+                    "El monto pagado no puede superar el total de la venta"
+            );
+        }
+        if (montoPagado.compareTo(venta.getMontoPagado()) < 0) {
+            throw new IllegalArgumentException(
+                    "El monto pagado no puede disminuir"
+            );
+        }
+        // Determinar el estado real según el pago
+        EstadoVenta estadoCalculado =
+                montoPagado.compareTo(venta.getTotal()) == 0
+                        ? EstadoVenta.PAGADO
+                        : EstadoVenta.DEBE;
+        if (estado != estadoCalculado) {
+            throw new IllegalArgumentException(
+                    "El estado no coincide con el monto pagado. Estado esperado: "
+                            + estadoCalculado
+            );
+        }
+        // Si está en espera, estamos confirmando el pedido
+        if (venta.getEstado() == EstadoVenta.EN_ESPERA) {
+            // Agrupar cantidades por producto y ordenar los IDs
+            Map<Long, Integer> cantidades = new TreeMap<>();
+            for (DetalleVenta detalle : venta.getDetalles()) {
+                cantidades.merge(
+                        detalle.getProducto().getId(),
+                        detalle.getCantidad(),
+                        Math::addExact
+                );
+            }
+            // Bloquear y comprobar todos los productos antes de descontar
+            Map<Long, Producto> productosBloqueados = new LinkedHashMap<>();
+            for (Map.Entry<Long, Integer> linea : cantidades.entrySet()) {
+                Producto producto = productoRepository
+                        .findActivoByIdForUpdate(linea.getKey())
+                        .orElseThrow(() -> new NoSuchElementException(
+                                "Producto activo no encontrado: " + linea.getKey()
+                        ));
+                if (producto.getStock() == null || producto.getStock() < linea.getValue()) {
+                    throw new IllegalStateException(
+                            "Stock insuficiente para el producto: "
+                                    + producto.getNombre()
+                    );
+                }
+                productosBloqueados.put(linea.getKey(), producto);
+            }
+            // Descontar stock después de validar todos los productos
+            for (Map.Entry<Long, Integer> linea : cantidades.entrySet()) {
+                Producto producto = productosBloqueados.get(linea.getKey());
+                producto.setStock(producto.getStock() - linea.getValue());
+            }
+            // Iniciar el seguimiento de la entrega
+            if (venta.getModalidadEntrega() == ModalidadEntrega.DELIVERY) {
+                venta.setEstadoEntrega(EstadoEntrega.PENDIENTE);
+            }
+        }
         venta.setMontoPagado(montoPagado);
+        venta.setEstado(estadoCalculado);
         return ventaRepository.save(venta);
     }
+
 }
