@@ -324,7 +324,7 @@ class StockVentasApplicationTests {
         assertThatThrownBy(() ->
                 ventaService.guardar(
                         new VentaDTO(
-                                EstadoVenta.PEDIDO,
+                                EstadoVenta.DEBE,
                                 BigDecimal.ZERO,
                                 List.of(new DetalleVentaDTO(producto.getId(), 1))
                         )

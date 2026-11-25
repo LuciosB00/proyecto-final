@@ -34,43 +34,17 @@ public class Producto {
         this.activo = true;
     }
 
-    public Long getId() {
-        return id;
-    }
+    public Long getId() {return id;}
 
-    public String getNombre() {
-        return nombre;
-    }
+    public String getNombre() {return nombre;}
+    public void setNombre(String nombre) {this.nombre = nombre;}
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
+    public BigDecimal getPrecio() {return precio;}
+    public void setPrecio(BigDecimal precio) {this.precio = precio;}
 
-    public BigDecimal getPrecio() {
-        return precio;
-    }
+    public Integer getStock() {return stock;}
+    public void setStock(Integer stock) {this.stock = stock;}
 
-    public void setPrecio(BigDecimal precio) {
-        this.precio = precio;
-    }
-
-    public Integer getStock() {
-        return stock;
-    }
-
-    public void setStock(Integer stock) {
-        this.stock = stock;
-    }
-
-    public boolean isActivo() {
-        return activo;
-    }
-
-    public boolean getActivo() {
-        return activo;
-    }
-
-    public void setActivo(boolean activo) {
-        this.activo = activo;
-    }
+    public boolean getActivo() {return activo;}
+    public void setActivo(boolean activo) {this.activo = activo;}
 }

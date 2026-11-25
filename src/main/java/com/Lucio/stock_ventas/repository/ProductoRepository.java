@@ -1,3 +1,4 @@
+
 package com.Lucio.stock_ventas.repository;
 
 import com.Lucio.stock_ventas.entity.Producto;
@@ -11,13 +12,20 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ProductoRepository extends JpaRepository<Producto, Long> {
+
+    // Productos activos ordenados por nombre
     List<Producto> findByActivoTrueOrderByNombreAsc();
-    List<Producto> findByActivoTrueAndStockLessThanEqualOrderByStockAscNombreAsc(Integer limite);
+
+    // Productos activos con stock igual o inferior al límite
+    List<Producto> findByActivoTrueAndStockLessThanEqualOrderByStockAscNombreAsc(
+            Integer limite
+    );
+
+    // Buscar un producto activo por ID
     Optional<Producto> findByIdAndActivoTrue(Long id);
 
+    // Bloquear el producto durante operaciones críticas de stock
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select p from Producto p where p.id = :id and p.activo = true")
+    @Query("SELECT p FROM Producto p WHERE p.id = :id AND p.activo = true")
     Optional<Producto> findActivoByIdForUpdate(@Param("id") Long id);
-
-    List<Producto> findByStockLessThan(int i);
 }
