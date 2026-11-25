@@ -2,25 +2,16 @@ package com.Lucio.stock_ventas.service;
 
 import com.Lucio.stock_ventas.dto.DetalleVentaDTO;
 import com.Lucio.stock_ventas.dto.VentaDTO;
-import com.Lucio.stock_ventas.entity.DetalleVenta;
-import com.Lucio.stock_ventas.entity.EstadoVenta;
-import com.Lucio.stock_ventas.entity.Producto;
-import com.Lucio.stock_ventas.entity.Venta;
+import com.Lucio.stock_ventas.entity.*;
 import com.Lucio.stock_ventas.repository.ProductoRepository;
 import com.Lucio.stock_ventas.repository.VentaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.NoSuchElementException;
-import com.Lucio.stock_ventas.entity.EstadoEntrega;
-import com.Lucio.stock_ventas.entity.ModalidadEntrega;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.ArrayList;
+import java.util.*;
 
 @Service
 @Transactional(readOnly = true)
@@ -66,11 +57,13 @@ public class VentaService {
                 ? EstadoVenta.EN_ESPERA
                 : datos.getEstado();
         if (estado != EstadoVenta.EN_ESPERA) {
-            throw new IllegalArgumentException("Una venta nueva debe crearse en estado EN_ESPERA");}
+            throw new IllegalArgumentException("Una venta nueva debe crearse en estado EN_ESPERA");
+        }
         // Validar modalidad de entrega
         ModalidadEntrega modalidad = datos.getModalidadEntrega();
         if (modalidad == null) {
-            throw new IllegalArgumentException("La modalidad de entrega es obligatoria");}
+            throw new IllegalArgumentException("La modalidad de entrega es obligatoria");
+        }
         BigDecimal costoEnvio = datos.getCostoEnvio() == null
                 ? BigDecimal.ZERO
                 : datos.getCostoEnvio();
@@ -80,7 +73,8 @@ public class VentaService {
         }
         String direccion = datos.getDireccionEntrega();
         if (modalidad == ModalidadEntrega.RETIRO_LOCAL) {
-            if (costoEnvio.signum() > 0) {throw new IllegalArgumentException("El retiro local no puede tener costo de envío");
+            if (costoEnvio.signum() > 0) {
+                throw new IllegalArgumentException("El retiro local no puede tener costo de envío");
             }
             direccion = null;
         } else if (modalidad == ModalidadEntrega.DELIVERY) {
@@ -153,7 +147,6 @@ public class VentaService {
         // No se modifica stock en esta etapa
         return ventaRepository.save(venta);
     }
-
 
     @Transactional
     public Venta actualizarEstadoYPago(Long id, EstadoVenta estado, BigDecimal montoPagado) {
@@ -242,6 +235,68 @@ public class VentaService {
         }
         venta.setMontoPagado(montoPagado);
         venta.setEstado(estadoCalculado);
+        return ventaRepository.save(venta);
+    }
+
+    @Transactional
+    public Venta marcarEnCamino(Long id) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException("El ID de venta no es válido");
+        }
+        Venta venta = ventaRepository.findByIdForUpdate(id)
+                .orElseThrow(() -> new NoSuchElementException(
+                        "Venta no encontrada: " + id
+                ));
+        if (venta.getEstado() != EstadoVenta.PAGADO) {
+            throw new IllegalStateException(
+                    "No se puede enviar una venta que no está completamente pagada"
+            );
+        }
+        if (venta.getModalidadEntrega() != ModalidadEntrega.DELIVERY) {
+            throw new IllegalStateException(
+                    "Esta operación solamente corresponde a ventas con delivery"
+            );
+        }
+        if (venta.getEstadoEntrega() != EstadoEntrega.PENDIENTE) {
+            throw new IllegalStateException(
+                    "La entrega debe estar en estado PENDIENTE para iniciar el envío"
+            );
+        }
+        venta.setEstadoEntrega(EstadoEntrega.EN_CAMINO);
+        return ventaRepository.save(venta);
+    }
+
+    @Transactional
+    public Venta marcarEntregada(Long id) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException("El ID de venta no es válido");
+        }
+        Venta venta = ventaRepository.findByIdForUpdate(id)
+                .orElseThrow(() -> new NoSuchElementException(
+                        "Venta no encontrada: " + id
+                ));
+        if (venta.getEstado() != EstadoVenta.PAGADO) {
+            throw new IllegalStateException(
+                    "No se puede entregar una venta que no está completamente pagada"
+            );
+        }
+        if (venta.getModalidadEntrega() == ModalidadEntrega.DELIVERY) {
+            if (venta.getEstadoEntrega() != EstadoEntrega.EN_CAMINO) {
+                throw new IllegalStateException(
+                        "El delivery debe estar EN_CAMINO antes de marcarlo como ENTREGADO"
+                );
+            }
+        } else if (venta.getModalidadEntrega() == ModalidadEntrega.RETIRO_LOCAL) {
+            if (venta.getEstadoEntrega() != EstadoEntrega.NO_APLICA) {
+                throw new IllegalStateException(
+                        "El retiro local no se encuentra en un estado válido"
+                );
+            }
+        } else {
+            throw new IllegalStateException("Modalidad de entrega no válida");
+        }
+        venta.setEstadoEntrega(EstadoEntrega.ENTREGADO);
+        venta.setFechaEntrega(LocalDateTime.now());
         return ventaRepository.save(venta);
     }
 
