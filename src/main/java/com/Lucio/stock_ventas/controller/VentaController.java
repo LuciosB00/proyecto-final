@@ -48,4 +48,14 @@ public class VentaController {
     public Venta actualizarEstadoYPago(@PathVariable Long id, @Valid @RequestBody ActualizarVentaDTO datos) {
         return ventaService.actualizarEstadoYPago(id, datos.getEstado(), datos.getMontoPagado());
     }
+
+    @PatchMapping("/{id}/en-camino")
+    public Venta marcarEnCamino(@PathVariable Long id) {
+        return ventaService.marcarEnCamino(id);
+    }
+
+    @PatchMapping("/{id}/entregada")
+    public Venta marcarEntregada(@PathVariable Long id) {
+        return ventaService.marcarEntregada(id);
+    }
 }

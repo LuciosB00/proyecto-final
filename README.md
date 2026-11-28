@@ -24,8 +24,10 @@ Ejecutar pruebas: `./mvnw test`.
 - `DELETE /api/productos/{id}` — desactivar sin borrar el historial.
 - `GET /api/ventas?producto=cafe&estado=DEBE&desde=2026-01-01&hasta=2026-12-31` — historial con filtros opcionales.
 - `GET /api/ventas/{id}` — consultar venta con sus detalles.
-- `POST /api/ventas` — registrar venta y descontar stock en una transacción: `{"estado":"EN_ESPERA","montoPagado":0,"detalles":[{"productoId":1,"cantidad":2}]}`.
-- `PATCH /api/ventas/{id}/pago` — actualizar estado/pago: `{"estado":"VENDIDO","montoPagado":2400.00}`.
+- `POST /api/ventas` — registrar una venta en espera; el stock se descuenta al confirmar: `{"estado":"EN_ESPERA","montoPagado":0,"detalles":[{"productoId":1,"cantidad":2}]}`.
+- `PATCH /api/ventas/{id}/pago` — confirmar la venta y actualizar pago: `{"estado":"PAGADO","montoPagado":2400.00}` (o `DEBE` si queda saldo).
+- `PATCH /api/ventas/{id}/en-camino` — iniciar el envío de una venta delivery pagada.
+- `PATCH /api/ventas/{id}/entregada` — marcar como entregada una venta pagada (delivery en camino o retiro local).
 - `GET /api/reportes` — totales, deuda, cantidad de ventas, producto más vendido, ventas por mes/estado y stock bajo.
 
-Los precios y montos utilizan `BigDecimal`; el stock se bloquea durante el registro de ventas para evitar que dos operaciones simultáneas vendan las mismas unidades.
+Los precios y montos utilizan `BigDecimal`; el stock se bloquea durante la confirmación para evitar que dos operaciones simultáneas vendan las mismas unidades.

@@ -43,9 +43,7 @@ class StockVentasApplicationTests {
         productoRepository.deleteAll();
     }
 
-    // --------------------------------------------------
     // 1. CONTEXTO
-    // --------------------------------------------------
 
     @Test
     void contextoCarga() {
@@ -53,9 +51,7 @@ class StockVentasApplicationTests {
         assertThat(ventaService).isNotNull();
     }
 
-    // --------------------------------------------------
     // 2. PRODUCTOS
-    // --------------------------------------------------
 
     @Test
     void registrarProductoGuardaCorrectamenteSusDatos() {
@@ -97,9 +93,7 @@ class StockVentasApplicationTests {
         assertThat(productoService.obtenerTodos()).isEmpty();
     }
 
-    // --------------------------------------------------
     // 3. REGISTRO DE VENTAS
-    // --------------------------------------------------
 
     @Test
     void registrarVentaEnEsperaNoDescuentaStockYCalculaTotal() {
@@ -158,9 +152,7 @@ class StockVentasApplicationTests {
         assertThat(ventaRepository.count()).isZero();
     }
 
-    // --------------------------------------------------
     // 4. VALIDACIONES DE CANTIDAD Y PAGO
-    // --------------------------------------------------
 
     @Test
     void noPermiteCantidadCero() {

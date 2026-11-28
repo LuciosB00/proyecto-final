@@ -40,11 +40,17 @@ public class ReporteService {
         Map<Long, ProductoVendido> productos = new java.util.HashMap<>();
 
         for (Venta venta : ventas) {
+            ventasEstado.merge(venta.getEstado(), 1L, Long::sum);
+
+            if (venta.getEstado() == EstadoVenta.EN_ESPERA
+                    || venta.getEstado() == EstadoVenta.CANCELADO) {
+                continue;
+            }
+
             totalVendido = totalVendido.add(venta.getTotal());
             totalAdeudado = totalAdeudado.add(venta.getSaldoPendiente());
             YearMonth mes = YearMonth.from(venta.getFecha());
             ventasMes.merge(mes, venta.getTotal(), BigDecimal::add);
-            ventasEstado.merge(venta.getEstado(), 1L, Long::sum);
             for (DetalleVenta detalle : venta.getDetalles()) {
                 Producto p = detalle.getProducto();
                 productos.compute(p.getId(), (id, actual) -> actual == null

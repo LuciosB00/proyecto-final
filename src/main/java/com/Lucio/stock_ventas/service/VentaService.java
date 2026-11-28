@@ -150,6 +150,9 @@ public class VentaService {
 
     @Transactional
     public Venta actualizarEstadoYPago(Long id, EstadoVenta estado, BigDecimal montoPagado) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException("El ID de venta no es válido");
+        }
         if (estado == null) {
             throw new IllegalArgumentException("El estado es obligatorio");
         }
